@@ -79,6 +79,20 @@
         $('#new-route-list').append(`<li>We generated route ${routeId} with length ${length}.</li>`);
     }
 
+    function bestRoute(result) {
+        console.log('Best route received from API: ', result);
+        const routeId = result.routeId;
+        const length = result.length;
+        $('#best-route-list').append(`<li>We got best route ${routeId} with length ${length}.</li>`);
+    }
+
+    function returnRoute(result) {
+        console.log('Route received from API: ', result);
+        const routeId = result.routeId;
+        const length = result.length;
+        $('route-by-id-elements').append(`<li>We got route ${routeId} with length ${length}.</li>`);
+    }
+
     // Make a `GET` request that gets the K best routes.
     // The form of the `GET` request is:
     //   …/best?runId=…&generation=…&numToReturn=…
@@ -86,8 +100,38 @@
     //    { length: …, routeId: …}
     // You should add each of these to `#best-route-list`
     // (after clearing it first).
+    function getBestRoute(runId, generation) {
+        $.ajax({
+            method: 'GET',
+            url: baseUrl + '/best',
+            data: JSON.stringify({
+                runId: runId,
+                generation: generation
+            }),
+            contentType: 'application/json',
+            // When a request completes, call `showRoute()` to display the
+            // route on the web page.
+            success: bestRoute,
+            error: function ajaxError(jqXHR, textStatus, errorThrown) {
+                console.error(
+                    'Error generating best routes: ', 
+                    textStatus, 
+                    ', Details: ', 
+                    errorThrown);
+                console.error('Response: ', jqXHR.responseText);
+                alert('An error occurred when best routes:\n' + jqXHR.responseText);
+            }
+        })
+    }
+
     function getBestRoutes(event) {
-        alert('You need to implement getBestRoutes()');
+        const runId = $('#runId-text-field').val();
+        const generation = $('#generation-text-field').val();
+        const numToReturn = $('#num-best-to-get').val();
+
+        $('#best-route-list').text('');
+
+        async.times(numToReturn, () => getBestRoute(runId, generation));
     }
 
     // Make a `GET` request that gets all the route information
@@ -98,7 +142,26 @@
     // You should display the returned information in 
     // `#route-by-id-elements` (after clearing it first).
     function getRouteById() {
-        alert('You need to implement getRouteById()');
+        $.ajax({
+            method: 'GET',
+            url: baseUrl + '/routes/:routeId',
+            data: JSON.stringify({
+                runId: runId,
+                generation: generation
+            }),
+            contentType: 'application/json',
+
+            success: returnRoute,
+            error: function ajaxError(jqXHR, textStatus, errorThrown) {
+                console.error(
+                    'Error retrieving route: ', 
+                    textStatus, 
+                    ', Details: ', 
+                    errorThrown);
+                console.error('Response: ', jqXHR.responseText);
+                alert('An error occurred when retrieving route:\n' + jqXHR.responseText);
+            }
+        })
     }
 
 }(jQuery));

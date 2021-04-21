@@ -141,7 +141,7 @@
     // This request will return a complete route JSON object.
     // You should display the returned information in 
     // `#route-by-id-elements` (after clearing it first).
-    function getRouteById() {
+    function getRouteById(runId, generation) {
         $.ajax({
             method: 'GET',
             url: baseUrl + '/routes/:routeId',
